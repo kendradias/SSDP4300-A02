@@ -10,11 +10,11 @@ const PORT = process.env.PORT || 3000;
 
 // Configure AWS SDK
 // For EC2 instances with IAM role, we don't need to explicitly provide credentials
-AWS.config.update({ region: 'us-east-1' }); // Change to your preferred region
+AWS.config.update({ region: 'us-west-2' }); // Change to your preferred region
 
 // Initialize DynamoDB client
 const dynamoDB = new AWS.DynamoDB.DocumentClient();
-const tableName = 'TodoItems'; // Your DynamoDB table name
+const tableName = 'ToDoItems'; // Your DynamoDB table name
 
 // Middleware
 app.use(bodyParser.json());
@@ -43,6 +43,7 @@ app.get('/api/todos', async (req, res) => {
 app.post('/api/todos', async (req, res) => {
     try {
         const { text } = req.body;
+        console.log('Received request to add todo:', text);
         
         if (!text) {
             return res.status(400).json({ error: 'Todo text is required' });
@@ -60,7 +61,9 @@ app.post('/api/todos', async (req, res) => {
             }
         };
         
+        console.log('Attempting to write to DynamoDB:', params);
         await dynamoDB.put(params).promise();
+        console.log('Successfully wrote to DynamoDB');
         
         res.status(201).json({
             id: todoId,
